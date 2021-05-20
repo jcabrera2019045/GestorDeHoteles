@@ -2,9 +2,9 @@
 
 var jwt = require('jwt-simple');
 var moment = require('moment');
-var key = 'clave_super_secreta_system';
+var key = 'secret_key';
 
-exports.createTokenUser = (user)=>{
+exports.createUserToken = (user)=>{
     var payload = {
         sub: user._id,
         name: user.name,
@@ -17,7 +17,7 @@ exports.createTokenUser = (user)=>{
     return jwt.encode(payload, key);
 } 
 
-exports.createTokenHotel = (hotel)=>{
+exports.createHotelToken = (hotel)=>{
     var payload = {
         sub: hotel._id,
         name: hotel.name,
