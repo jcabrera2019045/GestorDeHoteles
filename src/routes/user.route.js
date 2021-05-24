@@ -1,15 +1,15 @@
-'use strict'
+"use strict";
 
-var express = require('express');
-var userController = require('../controllers/user.controller');
-var mdAuth = require('../middlewares/authenticated');
+var express = require("express");
+var userController = require("../controllers/user.controller");
+var mdAuth = require("../middlewares/authenticated");
 
 var api = express.Router();
 
-api.post('/saveUser', userController.saveUser);
-api.post('/loginUser', userController.loginUser);
-api.put('/updateUser/:userId', mdAuth.ensureAuth,userController.updateUser);
-api.delete('/deleteUser/:userId', mdAuth.ensureAuth , userController.removeUser);
-api.get('/listUsers', mdAuth.ensureAuthAdmin , userController.listUsers);
+api.post("/registUser", userController.registUser);
+api.post("/loginUser", userController.loginUser);
+api.put("/editUser/:userId", mdAuth.ensureAuth, userController.editUser);
+api.delete("/deleteUser/:userId", mdAuth.ensureAuth, userController.deleteUser);
+api.get("/getUsers", mdAuth.ensureAuth, userController.getUsers);
 
 module.exports = api;

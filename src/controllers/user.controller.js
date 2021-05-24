@@ -1,173 +1,159 @@
-'use strict'
+"use strict";
 
-var User = require('../models/user.model');
-var bcrypt = require('bcrypt-nodejs');
-var jwt = require('../services/jwt');
-const strings = require('../constants/strings');
+var User = require("../models/user.model");
+var bcrypt = require("bcrypt-nodejs");
+var jwt = require("../services/jwt");
+const strings = require("../constants/strings");
 
-exports.saveUser = (req,res) => {
-    let user = new User();
-    let params = req.body;
+exports.registUser = (req, res) => {
+  let user = new User();
+  let params = req.body;
 
-    if(params.name && params.username && params.email && params.password){
-        User.findOne({$or:[{ username: params.username}, {email : params.email}]},(err,userFind)=>{
-            if(err){
-                res.status(500).send({ message : strings.serverError});
-            } else if (userFind){
-                res.send({message: strings.existingUserError});
+  if (params.name && params.username && params.email && params.password) {
+    if (params.role != null)
+      return res.status(500).send({ message: strings.cantAssignRoleError });
+    User.findOne(
+      { $or: [{ username: params.username }, { email: params.email }] },
+      (err, userFind) => {
+        if (err) {
+          res.status(500).send({ message: strings.serverError });
+        } else if (userFind) {
+          res.send({ message: strings.existingUserError });
+        } else {
+          user.name = params.name;
+          user.username = params.username;
+          user.email = params.email;
+          user.role = strings.userRole;
+
+          bcrypt.hash(params.password, null, null, (err, encryptedPass) => {
+            if (err) {
+              res.status(500).send({ message: strings.encryptPassError });
+            } else if (encryptedPass) {
+              user.password = encryptedPass;
+
+              user.save((err, userSaved) => {
+                if (err) {
+                  res.status(500).send({ message: strings.saveuserError });
+                } else if (userSaved) {
+                  res.send({ message: strings.userCreated, user: userSaved });
+                } else {
+                  res.status(404).send({ message: strings.notSavedUser });
+                }
+              });
             } else {
-                user.name = params.name;
-                user.username = params.username;
-                user.email = params.email;
-                user.role = strings.userRole;
+              res.status(418).send({ message: strings.unexpectedError });
+            }
+          });
+        }
+      }
+    );
+  } else {
+    res.send({ message: strings.unfilledDataError });
+  }
+};
 
-                bcrypt.hash(params.password, null, null, (err, password)=>{
-                    if(err){
-                        res.status(500).send({message: strings.encryptPassError});
-                    }else if(password){
-                        user.password = password;
+exports.loginUser = (req, res) => {
+  var params = req.body;
 
-                        user.save((err, userSaved)=>{
-                            if(err){
-                                res.status(500).send({message: strings.saveuserError});
-                            }else if(userSaved){
-                                res.send({message: strings.userCreated, user: userSaved});
-                            }else{
-                                res.status(404).send({message: strings.notSavedUser});
-                            }
-                        });
-                    }else{
-                        res.status(418).send({message: strings.unexpectedError});
-                    }
+  User.findOne(
+    { $or: [{ username: params.username }, { email: params.email }] },
+    (err, findUser) => {
+      if (err) return res.status(500).send({ mensaje: strings.requestError });
+      if (findUser) {
+        bcrypt.compare(
+          params.password,
+          findUser.password,
+          (err, successfullPass) => {
+            if (err)
+              return res
+                .status(500)
+                .send({ mensaje: strings.comparePassError });
+            if (successfullPass) {
+              if (params.getToken === "true") {
+                return res.status(200).send({
+                  Token: jwt.createToken(findUser),
                 });
-            }
-        }) 
-    } else {
-        res.send({ message : strings.unfilledDataError});
-    }
-}
-
-exports.loginUser = (req,res) => {
-    var params = req.body;
-
-    if(params.username || params.email){
-        if(params.password){
-            User.findOne({$or:[{username: params.username}, {email : params.email}]},(err,userFind)=>{
-                if(err){
-                    res.status(500).send({ message : strings.serverError}); 
-                } else if (userFind){
-                    bcrypt.compare(params.password, userFind.password, (err, passwordOk)=>{
-                        if(err){
-                            res.status(500).send({message: strings.comparePassError});
-                        }else if(passwordOk){
-                            if(params.gettoken){
-                                res.send({token: jwt.createTokenUser(userFind)});
-                            }else{
-                                res.send({message: strings.welcomeMsg,user:userFind});
-                            }
-                        }else{
-                            res.send({message: strings.incorrectPassError});
-                        }
-                    });
-                } else{
-                    res.send({message: strings.incorrectUserDataError});
-                }   
-            })
-        } else {
-            res.send({message: strings.enterPassError}); 
-        }
-    } else {
-        res.send({message: strings.enterUserError});
-    }
-}
-
-exports.updateUser = (req,res) => {
-    var userID = req.params.idU;
-    var update = req.body;
-
-    if(userID != req.user.sub){
-        res.status(403).send({ message : strings.permissionsError});
-    } else {
-        if(update.role){
-            res.status(418).send({ message : strings.cantUpdateRole});
-        } else if(update.username || update.email || update.password){
-            User.findOne({$or:[{ username: update.username}, {email: update.email}]},(err,userFind)=>{
-                if (err){
-                    res.status(500).send({ message : strings.serverError}); 
-                } else if (userFind){
-                    res.send({message: strings.existingUserError});
-                } else {
-                    if(update.password){
-                        bcrypt.hash(update.password, null,null, (err, passwordOk)=>{
-                            if(err){
-                                res.status(500).send({ message : strings.serverError}); 
-                            } else if (passwordOk){
-                                User.findByIdAndUpdate(userID, {password : passwordOk} ,{new: true}, (err, userUpdated)=>{
-                                    if(err){
-                                        res.status(500).send({ message : strings.serverError}); 
-                                    }else if (userUpdated){
-                                        res.send({ UserUpdated : userUpdated});
-                                    } else {
-                                        res.status(404).send({ message : strings.notFindUserToUpdateError});
-                                    }
-                                })
-                            } else {
-                                res.status(403).send({ message : strings.updatePassError});
-                            }
-                        })
-                    } else {
-                        User.findByIdAndUpdate(userID, update,{new: true}, (err, userUpdated)=>{
-                            if(err){
-                                res.status(500).send({ message : strings.serverError}); 
-                            }else if (userUpdated){
-                                res.send({ UserUpdated : userUpdated});
-                            } else {
-                                res.status(404).send({ message : strings.notFindUserToUpdateError});
-                            }
-                        })
-                    }
-                }
-            })
-        } else {
-            User.findByIdAndUpdate(userID, update ,{new: true}, (err, userUpdated)=>{
-                if(err){
-                    res.status(500).send({ message : strings.serverError}); 
-                }else if (userUpdated){
-                    res.send({ UserUpdated : userUpdated});
-                } else {
-                    res.status(404).send({ message : strings.notFindUserToUpdateError});
-                }
-            })
-        }
-    }
-}
-
-exports.removeUser = (req,res) => {
-    let userID = req.params.idU;
-
-    if(userID != req.user.sub){
-        res.status(403).send({ message : strings.permissionsError});
-    }else {
-        User.findByIdAndRemove(userID,(err,userRemoved)=>{
-            if(err){
-                res.status(500).send({ message : strings.serverError}); 
-            } else if (userRemoved){
-                res.send({ UserRemoved : userRemoved});
+              } else {
+                findUser.password = undefined;
+                return res.status(200).send(findUser);
+              }
             } else {
-                res.status(404).send({ message : strings.notFindUserToDeleteError});
+              return res
+                .status(404)
+                .send({ mensaje: strings.incorrectPassError });
             }
-        })
+          }
+        );
+      } else {
+        return res.status(404).send({ mensaje: strings.notFindUserError });
+      }
     }
-}
+  );
+};
 
-exports.listUsers = (req,res) => {
-    User.find({}, (err, users)=>{
-        if(err){
-            res.status(500).send({ message : strings.serverError}); 
-        } else if (users){
-            res.send({ Users: users});
-        } else {
-            res.status(404).send({ message : strings.noDataError});
-        }
-    });
-}
+exports.editUser = (req, res) => {
+  var userID = req.params.userId;
+  var params = req.body;
+
+  if (userID != req.user.sub) {
+    return res.status(500).send({ mensaje: strings.permissionsError });
+  }
+  if (params.role != null) {
+    return res.status(500).send({ mensaje: strings.cantUpdateRole });
+  }
+  User.find(
+    { $or: [{ username: params.username }, { email: params.email }] },
+    (err, userFind) => {
+      if (err) {
+        return res.status(500).send({ message: strings.unexpectedError });
+      } else if (userFind) {
+        return res.status(500).send({ message: strings.existingUserError });
+      } else {
+        User.findByIdAndUpdate(
+          userID,
+          params,
+          { new: true },
+          (er, updatedUser) => {
+            if (er)
+              return res.status(500).send({ mensaje: strings.requestError });
+            if (!updatedUser)
+              return res.status(500).send({ mensaje: strings.updateUserError });
+            return res.status(200).send({ updatedUser });
+          }
+        );
+      }
+    }
+  );
+};
+
+exports.deleteUser = (req, res) => {
+  const userId = req.params.userId;
+
+  if (userId != req.user.sub) {
+    return res.status(500).send({ mensaje: strings.permissionsError });
+  }
+
+  User.findByIdAndDelete(userId, (er, deletedUser) => {
+    if (er) return res.status(500).send({ mensaje: strings.requestError });
+    if (!deletedUser)
+      return res.status(500).send({ mensaje: strings.deleteClientError });
+    return res.status(200).send({ deletedUser });
+  });
+};
+
+exports.getUsers = (req, res) => {
+  if (req.user.sub == null) {
+    return res.status(500).send({ mensaje: strings.requestHeadersError });
+  }
+
+  if (req.user.role != strings.adminRole) {
+    return res.status(500).send({ mensaje: strings.permissionsError });
+  }
+
+  User.find((err, findUser) => {
+    if (err) return res.status(500).send({ mensaje: strings.requestError });
+    if (!findUser)
+      return res.status(500).send({ mensaje: strings.serverError });
+    return res.status(200).send({ findUser });
+  });
+};
