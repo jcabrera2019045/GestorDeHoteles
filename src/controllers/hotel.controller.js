@@ -4,17 +4,18 @@ var Hotel = require('../models/hotel.model');
 var bcrypt = require('bcrypt-nodejs');
 var jwt = require('../services/jwt');
 var fs = require('fs');
+const strings = require('../constants/strings');
 
-function saveHotel(req,res){
+exports.saveHotel = (req,res) => {
     let hotel = new Hotel();
     var params = req.body;
 
     if(params.name && params.username && params.email && params.password && params.location && params.qualification && params.availableStartDate && params.availableEndDate){
         Hotel.findOne({$or:[{name : params.name},{ username: params.username}, {email : params.email}]},(err,hotelFind)=>{
             if(err){
-                res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'});
+                res.status(500).send({ message : strings.serverError});
             } else if (hotelFind){
-                res.send({message: 'Usuario o correo ingresados ya existen en el sistema'});
+                res.send({message: strings.existingUserError});
             } else {
                 if(params.availableStartDate <= params.availableEndDate){
                     hotel.name = params.name;
@@ -28,107 +29,107 @@ function saveHotel(req,res){
 
                     bcrypt.hash(params.password, null, null, (err, password)=>{
                         if(err){
-                            res.status(500).send({message: 'Error al encriptar contraseña'});
+                            res.status(500).send({message: strings.encryptPassError});
                         }else if(password){
                             hotel.password = password;
 
                             hotel.save((err, hotelSaved)=>{
                                 if(err){
-                                    res.status(500).send({message: 'Error general al guardar usuario'});
+                                    res.status(500).send({message: strings.saveUserError});
                                 }else if(hotelSaved){
-                                    res.send({message: 'Hotel creado', Hotel: hotelSaved});
+                                    res.send({message: strings.succesfullyHotelCreated, Hotel: hotelSaved});
                                 }else{
-                                    res.status(404).send({message: 'Se a producido un error usuario no guardado'});
+                                    res.status(404).send({message: strings.notSavedHotel});
                                 }
                             });
                         }else{
-                            res.status(418).send({message: 'Error inesperado'});
+                            res.status(418).send({message: strings.unexpectedError});
                         }
                     });
                 } else {
-                    res.send({ message : 'El rango de fechas ingresado es incorrecto'});
+                    res.send({ message : strings.datesRangeError});
                 }
             }
         }) 
     } else {
-        res.send({ message : 'Ingrese todo los datos necesarios'});
+        res.send({ message : strings.unfilledDataError});
     }
 }
 
-function loginHotel(req,res){
+exports.loginHotel = (req,res) => {
     var params = req.body;
 
     if(params.username || params.email){
         if(params.password){
             Hotel.findOne({$or:[{username: params.username}, {email : params.email}]},(err,hotelFind)=>{
                 if(err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 } else if (hotelFind){
-                    bcrypt.compare(params.password, hotelFind.password, (err, passworOk)=>{
+                    bcrypt.compare(params.password, hotelFind.password, (err, passOk)=>{
                         if(err){
-                            res.status(500).send({message: 'Se a producido un error al comparar las contraseñas'});
-                        }else if(passworOk){
+                            res.status(500).send({message: strings.comparePassError});
+                        }else if(passOk){
                             if(params.gettoken){
                                 res.send({token: jwt.createTokenHotel(hotelFind)});
                             }else{
-                                res.send({message: 'Bienvenido',Hotel : hotelFind});
+                                res.send({message: strings.welcomeMsg,Hotel : hotelFind});
                             }
                         }else{
-                            res.send({message: 'Contraseña ingresada incorrecta'});
+                            res.send({message: strings.incorrectPassError});
                         }
                     });
                 } else{
-                    res.send({message: 'Datos de hotel incorrectos'});
+                    res.send({message: strings.incorrectHotelDataError});
                 }   
             })
         } else {
-            res.send({message: 'Debe de ingresas su contraseña'}); 
+            res.send({message: strings.enterPassError}); 
         }
     } else {
-        res.send({message: 'Debe de ingresar su correo o su username'});
+        res.send({message: strings.enterUserError});
     }
 }
 
-function updateHotel(req,res){
+exports.updateHotel = (req,res) => {
     let hotelID = req.params.idH;
     var update = req.body;
 
     if(hotelID != req.hotel.sub){
-        res.status(403).send({ message : 'Error, no tiene permisos para esta ruta'});
+        res.status(403).send({ message : strings.permissionsError});
     } else {
         if(update.name || update.username || update.email || update.password){
             Hotel.findOne({$or:[{name : update.name},{ username: update.username}, {email: update.email}]},(err,hotelFind)=>{
                 if (err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 } else if (hotelFind){
-                    res.send({message: 'Nombre usuario o correo ingresados ya existen en el sistema'});
+                    res.send({message: strings.existingUserError});
                 } else {
                     if(update.password){
-                        bcrypt.hash(update.password, null, null, (err, passworOk)=>{
+                        bcrypt.hash(update.password, null, null, (err, passOk)=>{
                             if(err){
-                                res.status(500).send({message: 'Se a producido un error al comparar las contraseñas'});
-                            }else if(passworOk){
-                                Hotel.findByIdAndUpdate(hotelID, {password : passworOk},{new: true}, (err, hotelUpdated)=>{
+                                res.status(500).send({message: strings.comparePassError});
+                            }else if(passOk){
+                                Hotel.findByIdAndUpdate(hotelID, {password : passOk},{new: true}, (err, hotelUpdated)=>{
                                     if(err){
-                                        res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                                        res.status(500).send({ message : strings.serverError}); 
                                     }else if (hotelUpdated){
                                         res.send({ HotelUpdated : hotelUpdated});
                                     } else {
-                                        res.status(404).send({ message : 'No se a encontrado el usuario a actualizar'});
+                                        res.status(404).send({ message : strings.notFindHotelToUpdateError});
                                     }
                                 })
                             }else{
-                                res.send({message: 'Se a producido un erro al intentar actualizar la contraseña'});
+                                res.send({message: strings.updatePassError});
                             }
                         });
                     } else {
                         Hotel.findByIdAndUpdate(hotelID, update,{new: true}, (err, hotelUpdated)=>{
                             if(err){
-                                res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                                res.status(500).send({ message : strings.serverError}); 
                             }else if (hotelUpdated){
                                 res.send({ HotelUpdated : hotelUpdated});
                             } else {
-                                res.status(404).send({ message : 'No se a encontrado el usuario a actualizar'});
+                                res.status(404).send({ message : strings.notFindHotelToUpdateError});
                             }
                         })
                     }
@@ -138,155 +139,144 @@ function updateHotel(req,res){
             if(update.availableStartDate <= update.availableEndDate){
                 Hotel.findByIdAndUpdate(hotelID, update,{new: true}, (err, hotelUpdated)=>{
                     if(err){
-                        res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                        res.status(500).send({ message : strings.serverError}); 
                     }else if (hotelUpdated){
                         res.send({ HotelUpdated : hotelUpdated});
                     } else {
-                        res.status(404).send({ message : 'No se a encontrado el usuario a actualizar'});
+                        res.status(404).send({ message : strings.notFindHotelToUpdateError});
                     }
                 })
             } else {
-                res.send({ message : 'El rango de fechas es incorrecto'});
+                res.send({ message : strings.datesRangeError});
             }
         } else {
             Hotel.findByIdAndUpdate(hotelID, update,{new: true}, (err, hotelUpdated)=>{
                 if(err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 }else if (hotelUpdated){
                     res.send({ HotelUpdated : hotelUpdated});
                 } else {
-                    res.status(404).send({ message : 'No se a encontrado el usuario a actualizar'});
+                    res.status(404).send({ message : strings.notFindHotelToUpdateError});
                 }
             })
         }
     }
 }
 
-function removeHotel(req,res){
+exports.removeHotel = (req,res) => {
     let hotelID = req.params.idH;
 
     if(hotelID != req.hotel.sub){
-        res.status(403).send({ message : 'Error, no tiene permisos para esta ruta'});
+        res.status(403).send({ message : strings.permissionsError});
     }else {
         Hotel.findByIdAndRemove(hotelID,(err,hotelRemoved)=>{
             if(err){
-                res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                res.status(500).send({ message : strings.serverError}); 
             } else if (hotelRemoved){
                 res.send({ HotelRemoved : hotelRemoved});
             } else {
-                res.status(404).send({ message : 'No se a encontrado el usuario a eliminar'});
+                res.status(404).send({ message : strings.notFindHotelToDeleteError});
             }
         })
     }
 }
 
-function listHotels(req,res){
+exports.listHotels = (req,res) => {
     Hotel.find({}, (err, hotels)=>{
         if(err){
-            res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+            res.status(500).send({ message : strings.serverError}); 
         } else if (hotels){
             res.send({ Hotel: hotels});
         } else {
-            res.status(404).send({ message : 'No hay registros que mostrar'});
+            res.status(404).send({ message : strings.noDataError});
         }
     });
 }
 
-function searchByDateRangeandQualification (req,res){
+exports.searchByDateRangeandQualification = (req,res) => {
     let params = req.body;
 
     if(params.search){
         Hotel.find({ qualification:params.search},(err, hotels)=>{
             if(err){
-                res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                res.status(500).send({ message : strings.serverError}); 
             } else if(hotels.length>0) {
                 res.send({ Hotels : hotels});
             } else {
                 var searchDate = new Date(params.search);
                 Hotel.find({ availableStartDate: { $lte : searchDate}, availableEndDate : {$gte: searchDate}},(err, hotels)=>{
                     if(err){
-                        res.status(500).send({ message : 'Error generalcaca en el servidor inténtelo más tarde'}); 
+                        res.status(500).send({ message : strings.serverError}); 
                     } else if(hotels) {
                         if(hotels.length>0){
                             res.send({ Hotels : hotels});
                         } else {
-                            res.send({ message : 'No hay datos que mostrar'});
+                            res.send({ message : strings.noDataError});
                         }
                     } else {
-                        res.status(404).send({ message : 'No se han encontrado hoteles en la fecha o con la calificación ingresada'});
+                        res.status(404).send({ message : strings.notFindHotelDateAndQualificationError});
                     }
                 });
             }
         });
-    } else if(params.search && params.search2){
-        Hotel.find({ availableStartDate: { $lte : params.search}, availableEndDate : {$gte: params.search2}},(err, hotels)=>{
+    } else if(params.startDate && params.endDate){
+        Hotel.find({ availableStartDate: { $lte : params.startDate}, availableEndDate : {$gte: params.endDate}},(err, hotels)=>{
             if(err){
-                res.status(500).send({ message : 'Error generalcaca en el servidor inténtelo más tarde'}); 
+                res.status(500).send({ message : strings.notFindHotelDateAndQualificationError}); 
             } else if(hotels) {
                 if(hotels.length>0){
                     res.send({ Hotels : hotels});
                 } else {
-                    res.send({ message : 'No hay datos que mostrar'});
+                    res.send({ message : strings.noDataError});
                 }
             } else {
-                res.status(404).send({ message : 'No se han encontrado hoteles en la fecha o con la calificación ingresada'});
+                res.status(404).send({ message : strings.notFindHotelDateAndQualificationError});
             }
         });
     } else {
-        res.send({ message : 'Debe de ingresar una fecha o una calificación a buscar'});
+        res.send({ message : strings.enterDataAndQualificationError});
     }
 }
 
-function searchPriceAndOrderAlphabetical(req,res){
+exports.searchPriceAndOrderAlphabetical = (req,res) => {
     let params = req.body;
 
     switch(params.search){
-        case 'alfabetico':
+        case strings.alphabetical :
             Hotel.find({},(err, hotel)=>{
                 if(err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 } else if(hotel) {
                     res.send({ Hotels : hotel});
                 } else {
-                    res.status(404).send({ message : 'No se han encontrado hoteles en el rago de fecha ingresado'});
+                    res.status(404).send({ message : strings.noDataError});
                 }
             }).sort({ name: 1});
         break;
-        case 'Precio-Descendente': 
+        case strings.priceDesc : 
             Hotel.find({},(err, hotel)=>{
                 if(err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 } else if(hotel) {
                     res.send({ Hotels : hotel});
                 } else {
-                    res.status(404).send({ message : 'No se han encontrado hoteles en el rago de fecha ingresado'});
+                    res.status(404).send({ message : strings.noDataError});
                 }
             }).sort({ price: -1});
         break;
-        case 'Precio-Ascendente':
+        case strings.priceAsc :
             Hotel.find({},(err, hotel)=>{
                 if(err){
-                    res.status(500).send({ message : 'Error general en el servidor inténtelo más tarde'}); 
+                    res.status(500).send({ message : strings.serverError}); 
                 } else if(hotel) {
                     res.send({ Hotels : hotel});
                 } else {
-                    res.status(404).send({ message : 'No se han encontrado hoteles en el rago de fecha ingresado'});
+                    res.status(404).send({ message : strings.noDataError});
                 }
             }).sort({ price: 1});
         break;
         default:
-            res.send({message : 'Debe de ingresar una opción válida para ordenar los datos'});
+            res.send({message : strings.invalidOptionError});
         break;
     }
-}
-
-
-module.exports = {
-    saveHotel,
-    loginHotel,
-    updateHotel,
-    removeHotel,
-    listHotels,
-    searchByDateRangeandQualification,
-    searchPriceAndOrderAlphabetical,
 }

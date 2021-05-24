@@ -8,8 +8,8 @@ var api = express.Router();
 
 api.post('/saveHotel', mdAuth.ensureAuthAdmin, hotelController.saveHotel);
 api.post('/loginHotel',hotelController.loginHotel);
-api.put('/updateHotel/:idH', mdAuth.ensureAuthHotel, hotelController.updateHotel);
-api.delete('/deleteHotel/:idH', mdAuth.ensureAuthHotel , hotelController.removeHotel);
+api.put('/updateHotel/:hotelId', mdAuth.ensureAuthHotel, hotelController.updateHotel);
+api.delete('/deleteHotel/:hotelId', mdAuth.ensureAuthHotel , hotelController.removeHotel);
 api.get('/listHotels', mdAuth.ensureAuth , hotelController.listHotels);
 api.post('/searchByDateRangeandQualification', mdAuth.ensureAuth, hotelController.searchByDateRangeandQualification);
 api.post('/searchPriceAndOrderAlphabetical', mdAuth.ensureAuth, hotelController.searchPriceAndOrderAlphabetical);

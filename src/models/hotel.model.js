@@ -13,7 +13,9 @@ var hotelSchema = Schema({
     qualification: String,
     price: Number,
     availableStartDate: Date,
-    availableEndDate: Date
+    availableEndDate: Date,
+    manager: { type: Schema.Types.ObjectId, ref: 'user' },
+    rooms: { type: Schema.Types.ObjectId, ref: 'room' },
 })
 
 module.exports = mongoose.model('hotel', hotelSchema);

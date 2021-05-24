@@ -1,23 +1,16 @@
 'use strict'
 
-var express = require('express');
-var bodyParser = require('body-parser');
-var userRoutes = require('./routes/user.route');
-var hotelRoutes = require('./routes/hotel.route');
-var app = express();
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser")
+const cors = require("cors")
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+const user_route = require("./src/routes/user.route");
 
-app.use((req, res, next) => {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
-	res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-	res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-	next();
-});
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
-app.use(userRoutes);
-app.use(hotelRoutes);
+app.use(cors());
+app.use('/api', user_route,);
 
 module.exports = app;
