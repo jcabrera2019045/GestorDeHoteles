@@ -9,46 +9,62 @@ exports.registUser = (req, res) => {
   let user = new User();
   let params = req.body;
 
-  if (params.name && params.username && params.email && params.password) {
+  if (
+    params.name &&
+    params.lastname &&
+    params.username &&
+    params.email &&
+    params.password
+  ) {
     if (params.role != null)
       return res.status(500).send({ message: strings.cantAssignRoleError });
     User.findOne(
       { $or: [{ username: params.username }, { email: params.email }] },
       (err, userFind) => {
         if (err) {
-          res.status(500).send({ message: strings.serverError });
+          return res.status(500).send({ message: strings.serverError });
         } else if (userFind) {
-          res.send({ message: strings.existingUserError });
+          return res.send({ message: strings.existingUserError });
         } else {
           user.name = params.name;
+          user.lastname = params.lastname;
           user.username = params.username;
           user.email = params.email;
-          user.role = strings.userRole;
+          user.role = strings.hotelAdminRole;
 
           bcrypt.hash(params.password, null, null, (err, encryptedPass) => {
             if (err) {
-              res.status(500).send({ message: strings.encryptPassError });
+              return res
+                .status(500)
+                .send({ message: strings.encryptPassError });
             } else if (encryptedPass) {
               user.password = encryptedPass;
 
               user.save((err, userSaved) => {
                 if (err) {
-                  res.status(500).send({ message: strings.saveuserError });
+                  return res
+                    .status(500)
+                    .send({ message: strings.saveuserError });
                 } else if (userSaved) {
-                  res.send({ message: strings.userCreated, user: userSaved });
+                  return res.send({
+                    message: strings.userCreated,
+                    user: userSaved,
+                  });
                 } else {
-                  res.status(404).send({ message: strings.notSavedUser });
+                  return res
+                    .status(404)
+                    .send({ message: strings.notSavedUser });
                 }
               });
             } else {
-              res.status(418).send({ message: strings.unexpectedError });
+              return res.status(418).send({ message: strings.unexpectedError });
             }
           });
         }
       }
     );
   } else {
-    res.send({ message: strings.unfilledDataError });
+    return res.send({ message: strings.unfilledDataError });
   }
 };
 

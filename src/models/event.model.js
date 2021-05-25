@@ -8,7 +8,7 @@ var eventSchema = Schema({
     eventTypeId: { type: Schema.ObjectId, ref: 'eventType' },
     capacity: Number,
     hotelId: { type: Schema.ObjectId, ref: 'hotel' },
-    date: Date,
+    date: String,
 })
 
 module.exports = mongoose.model('event', eventSchema);

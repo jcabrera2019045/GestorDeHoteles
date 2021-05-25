@@ -1,21 +1,12 @@
-'use strict'
+"use strict";
 
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var hotelSchema = Schema({
-    name: String,
-    username: String,
-    email: String,
-    password: String,
-    location: String,
-    phone: String,
-    qualification: String,
-    price: Number,
-    availableStartDate: Date,
-    availableEndDate: Date,
-    manager: { type: Schema.Types.ObjectId, ref: 'user' },
-    rooms: { type: Schema.Types.ObjectId, ref: 'room' },
-})
+  name: String,
+  location: String,
+  manager: { type: Schema.Types.ObjectId, ref: "user" },
+});
 
-module.exports = mongoose.model('hotel', hotelSchema);
+module.exports = mongoose.model("hotel", hotelSchema);
