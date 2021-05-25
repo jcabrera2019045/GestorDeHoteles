@@ -14,6 +14,7 @@ mongoose
   })
   .then(() => {
     var name = strings.defaultAdminName;
+    var lastname = strings.defaultAdminLastName;
     var password = strings.defaultAdminPass;
     var role = strings.defaultAdminRole;
     var username = strings.defaultAdminUsername;
@@ -21,6 +22,7 @@ mongoose
     var user = new userModel();
 
     user.name = name;
+    user.lastname = lastname;
     user.role = role;
     user.username = username;
     user.email = email;
@@ -29,7 +31,7 @@ mongoose
       .find({ $or: [{ username: user.username }, { email: user.email }] })
       .exec((_err, findUser) => {
         if (findUser && findUser.length >= 1) {
-          return console.log(strings.existingUser);
+          return console.log(strings.existingUserError);
         } else {
           bcrypt.hash(password, null, null, (err, encryptedPass) => {
             if (err)
