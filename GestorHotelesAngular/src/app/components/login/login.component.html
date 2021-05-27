@@ -1,0 +1,25 @@
+<div class="container">
+  <div class="d-flex justify-content-md-center align-items-center loginContainer">
+    <div class="col col-lg-4">
+      <div class="mb-3">
+        <img src="/assets/images/loginLogo.png" class="loginImage">
+      </div>
+      <form>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Usuario o Email</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" name="email" placeholder="ejemplo@gmail.com"
+            #email="ngModel" [(ngModel)]="userModel.email" #username="ngModel" [(ngModel)]="userModel.username">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="12345" name="password"
+            #password="ngModel" [(ngModel)]="userModel.password">
+        </div>
+        <p>
+          ¿Aun no tienes una cuenta? <a routerLink="/regist" class="text-reset">Registrarse</a>.
+        </p>
+        <button type="submit" class="btn btn-primary" (click)="login()">Loguearse</button>
+      </form>
+    </div>
+  </div>
+</div>
