@@ -1,0 +1,40 @@
+<div class="container">
+  <div class="d-flex justify-content-md-center align-items-center registContainer">
+    <div class="col col-lg-4">
+      <div class="mb-3">
+        <img src="/assets/images/loginLogo.png" class="registImage">
+      </div>
+      <form (ngSubmit)="regist()">
+        <div class="mb-3">
+          <label for="exampleInputName1" class="form-label">Nombre</label>
+          <input type="text" class="form-control" id="exampleInputName1" name="name" placeholder="Javier"
+            #name="ngModel" [(ngModel)]="user.name">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputLastName1" class="form-label">Apellido</label>
+          <input type="text" class="form-control" id="exampleInputLastName1" name="lastname" placeholder="Cabrera"
+            #lastname="ngModel" [(ngModel)]="user.lastname">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputUserName1" class="form-label">Nombre de Usuario</label>
+          <input type="text" class="form-control" id="exampleInputUserName1" name="username" placeholder="jcabrera"
+            #username="ngModel" [(ngModel)]="user.username">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Email</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" name="email" placeholder="ejemplo@gmail.com"
+            #email="ngModel" [(ngModel)]="user.email">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="12345" name="password"
+            #password="ngModel" [(ngModel)]="user.password">
+        </div>
+        <p>
+          ¿Ya tienes una cuenta? <a routerLink="/login" class="text-reset">Iniciar Sesión</a>.
+        </p>
+        <button type="submit" class="btn btn-primary">Registrarse</button>
+      </form>
+    </div>
+  </div>
+</div>

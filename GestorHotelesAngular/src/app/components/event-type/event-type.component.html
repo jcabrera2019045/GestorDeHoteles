@@ -1,0 +1,161 @@
+<app-navbar></app-navbar>
+<br><br>
+<div class="btn-group topButtons" role="group" aria-label="First group">
+  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addEventType"
+    *ngIf='identity.role == "admin_role"'>Agregar
+    Tipo Evento</button>
+</div>
+<br><br>
+<table class="table">
+  <thead>
+    <tr class="tableText">
+      <th scope="col">Id</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Descripción</th>
+      <th scope="col">Opciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let evtp of eventTypes" class="tableText">
+      <th scope="row">{{evtp._id}}</th>
+      <td>{{evtp.name}}</td>
+      <td>{{evtp.description}}</td>
+      <td>
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+            data-bs-target="#eventTypeInformation" (click)="getEventTypeId(evtp._id)">Más Información</button>
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEventType"
+            (click)="getEventTypeId(evtp._id)">Editar</button>
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#deleteEventType"
+            (click)="getEventTypeId(evtp._id)">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Create Event Type Modal -->
+
+<div class="modal fade" id="addEventType" tabindex="-1" aria-labelledby="addEventTypeLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addEventTypeLabel">Crear Tipo de Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="eventTypeModel.name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputDescription" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="exampleInputDescription" name="description"
+              #description="ngModel" [(ngModel)]="eventTypeModel.description">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="createEventType()" data-bs-dismiss="modal">Crear Tipo
+          Evento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Event Type Information Modal -->
+
+<div class="modal fade" id="eventTypeInformation" tabindex="-1" aria-labelledby="eventTypeInformationLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventTypeInformationLabel">Información del Tipo Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputId" class="form-label">ID</label>
+            <input type="text" class="form-control" id="exampleInputId" name="id" #_id="ngModel"
+              [(ngModel)]="eventTypeModel._id" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="eventTypeModel.name" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputDescription" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="exampleInputDescription" name="description"
+              #description="ngModel" [(ngModel)]="eventTypeModel.description" disabled>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Event Type Modal -->
+
+<div class="modal fade" id="editEventType" tabindex="-1" aria-labelledby="editEventTypeLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editEventTypeLabel">Editar Tipo Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputId" class="form-label">ID</label>
+            <input type="text" class="form-control" id="exampleInputId" name="id" #_id="ngModel"
+              [(ngModel)]="eventTypeModel._id" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="eventTypeModel.name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputLastName" class="form-label">Descripción</label>
+            <input type="text" class="form-control" id="exampleInputLastName" name="description" #description="ngModel"
+              [(ngModel)]="eventTypeModel.description">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="updateEventType()">Editar
+          Tipo Evento</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Event Type Modal -->
+
+<div class="modal fade" id="deleteEventType" tabindex="-1" aria-labelledby="deleteEventTypeLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteEventTypeLabel">Eliminar Tipo Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Esta seguro de eliminar {{eventTypeModel.name}}?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="deleteEventType()">Eliminar
+          Tipo Evento</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,227 @@
+<app-navbar></app-navbar>
+<br><br>
+<div class="btn-group topButtons" role="group" aria-label="First group">
+  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addHotel"
+    *ngIf='identity.role == "admin_role"'>Agregar
+    Hotel</button>
+</div>
+<br><br>
+<table class="table">
+  <thead>
+    <tr class="tableText">
+      <th scope="col" *ngIf='identity.role == "admin_role"'>Id</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Localización</th>
+      <th scope="col" *ngIf='identity.role == "admin_role"'>Manager</th>
+      <th scope="col">Opciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let htl of hotels" class="tableText">
+      <th scope="row" *ngIf='identity.role == "admin_role"'>{{htl._id}}</th>
+      <td>{{htl.name}}</td>
+      <td>{{htl.location}}</td>
+      <td *ngIf='identity.role == "admin_role"'>{{htl.manager}}</td>
+      <td>
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+            data-bs-target="#hotelInformation" (click)="getHotelId(htl._id)">Más Información</button>
+          <button type="button" class="btn btn-outline-primary" *ngIf='identity.role == "user_role"'
+            data-bs-toggle="modal" data-bs-target="#rooms" (click)="getHotelAndRoomId(htl._id)">Habitaciones</button>
+          <button type="button" class="btn btn-outline-primary" *ngIf='identity.role == "user_role"'
+            data-bs-toggle="modal" data-bs-target="#events" (click)="getHotelAndEventId(htl._id)">Eventos</button>
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editHotel"
+            (click)="getHotelId(htl._id)" *ngIf='identity.role == "admin_role"'>Editar</button>
+          <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#deleteHotel"
+            (click)="getHotelId(htl._id)" *ngIf='identity.role == "admin_role"'>Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Create Hotel Modal -->
+
+<div class="modal fade" id="addHotel" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Crear Hotel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="hotelModel.name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputLocation" class="form-label">Localización</label>
+            <input type="text" class="form-control" id="exampleInputLocation" name="location" #location="ngModel"
+              [(ngModel)]="hotelModel.location">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputManager" class="form-label">Manager</label>
+            <input type="text" class="form-control" id="exampleInputManager" name="manager" #manager="ngModel"
+              [(ngModel)]="hotelModel.manager">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createHotel()">Crear
+          Hotel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Hotel Modal -->
+
+<div class="modal fade" id="editHotel" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Editar Hotel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="hotelModel.name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputLocation" class="form-label">Localización</label>
+            <input type="text" class="form-control" id="exampleInputLocation" name="location" #location="ngModel"
+              [(ngModel)]="hotelModel.location">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="updateHotel()">Editar
+          Hotel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hotel Information Modal -->
+
+<div class="modal fade" id="hotelInformation" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Información del Hotel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="exampleInputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="exampleInputName" name="name" #name="ngModel"
+              [(ngModel)]="hotelModel.name" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputLocation" class="form-label">Localización</label>
+            <input type="text" class="form-control" id="exampleInputLocation" name="location" #location="ngModel"
+              [(ngModel)]="hotelModel.location" disabled>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Hotel Modal -->
+
+<div class="modal fade" id="deleteHotel" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Eliminar Hotel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Esta seguro de eliminar {{hotelModel.name}}?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="deleteHotel()">Eliminar
+          Hotel</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rooms Modal -->
+
+<div class="modal fade" id="rooms" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Habitaciones</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Precio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let rm of room">
+              <td>{{rm.name}}</td>
+              <td>Q.{{rm.price}}.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Events Modal -->
+
+<div class="modal fade" id="events" tabindex="-1" aria-labelledby="addHotelLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addHotelLabel">Eventos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Capacidad</th>
+              <th scope="col">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let evt of event">
+              <td>{{evt.name}}</td>
+              <td>{{evt.capacity}}</td>
+              <td>{{evt.date}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
