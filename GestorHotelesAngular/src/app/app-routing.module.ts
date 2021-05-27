@@ -15,7 +15,7 @@ const routes: Routes = [
   { path: 'users', component: UsersComponent },
   { path: 'eventType', component: EventTypeComponent },
   { path: 'profile', component: ProfileComponent },
-  { path: '**', component: HotelsComponent }
+  { path: '**', component: LoginComponent }
 ];
 
 @NgModule({
